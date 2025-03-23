@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api/api';
+import axios from 'axios';
 
-// Визначаємо тип для замовлення
 interface Order {
     id: number;
     title: string;
@@ -10,25 +9,32 @@ interface Order {
 }
 
 const OrderList = () => {
-    // Вказуємо TypeScript, що orders — це масив об'єктів типу Order
     const [orders, setOrders] = useState<Order[]>([]);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await api.get('/orders');
-                console.log('Отримані замовлення:', response.data); // Лог для перевірки
+                const token = sessionStorage.getItem('authToken'); // Отримуємо токен із sessionStorage
+                if (!token) throw new Error('Користувач не авторизований.');
+
+                const response = await axios.get('http://localhost:8080/api/orders', {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
                 setOrders(response.data);
-            } catch (error) {
-                console.error('Помилка отримання замовлень:', error);
+            } catch (err) {
+                setError('Не вдалося завантажити замовлення.');
             }
         };
+
+
         fetchOrders();
     }, []);
 
     return (
         <div>
             <h2>Список замовлень</h2>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
             {orders.map((order) => (
                 <div key={order.id}>
                     <h3>{order.title}</h3>

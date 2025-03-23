@@ -20,14 +20,16 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Ця електронна пошта вже зареєстрована");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setType(UserType.CLIENT); // Новий користувач отримує роль CLIENT за замовчуванням
+        user.setApproved(false); // Користувач ще не підтверджений адміністратором
         userRepository.save(user);
-        return ResponseEntity.ok("Користувач успішно зареєстрований");
+        return ResponseEntity.ok("Реєстрація успішна! Очікуйте підтвердження від адміністратора.");
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("Користувача не знайдено"));
+        User user = userRepository.findByEmailAndIsApprovedTrue(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Користувача не знайдено або він не підтверджений"));
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             return ResponseEntity.status(401).body("Неправильний пароль");

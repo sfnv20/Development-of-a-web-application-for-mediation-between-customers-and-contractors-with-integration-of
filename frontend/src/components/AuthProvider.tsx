@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 
 interface AuthContextType {
     isAuthenticated: boolean;
-    login: (token: string, rememberMe: boolean) => void;
+    login: (token: string, email: string, rememberMe: boolean) => void;
     logout: () => void;
 }
 
@@ -13,7 +13,9 @@ const AuthContext = createContext<AuthContextType>({
     logout: () => {},
 });
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+                                                                          children,
+                                                                      }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
@@ -48,3 +50,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         </AuthContext.Provider>
     );
 };
+
+export const useAuth = () => useContext(AuthContext);

@@ -28,13 +28,8 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserType type;
+    private UserType type; // CLIENT, EXECUTOR, ADMIN
 
-    public List<SimpleGrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + type.name()));
-    }
-
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore // Уникаємо серіалізації списку замовлень клієнта для уникнення циклічної залежності
-    private List<Order> clientOrders;
+    @Column(nullable = false)
+    private boolean isApproved = false; // Чи підтверджений користувач адміністратором
 }
