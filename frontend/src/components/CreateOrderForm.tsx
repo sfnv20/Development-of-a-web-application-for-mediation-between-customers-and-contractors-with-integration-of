@@ -5,17 +5,18 @@ const CreateOrderForm = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        deadline: '',
+        deadline: '', // Дата у форматі yyyy-MM-dd
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         try {
             const response = await api.post('/orders', formData);
-            alert('Замовлення створено!');
+            alert('Замовлення успішно створено!');
         } catch (error) {
             console.error('Помилка створення замовлення:', error);
-            alert('Помилка створення замовлення');
+            alert('Не вдалося створити замовлення');
         }
     };
 
@@ -41,7 +42,7 @@ const CreateOrderForm = () => {
             <div>
                 <label>Дедлайн:</label>
                 <input
-                    type="date"
+                    type="date" // Використовуємо HTML input type="date"
                     value={formData.deadline}
                     onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
                     required
