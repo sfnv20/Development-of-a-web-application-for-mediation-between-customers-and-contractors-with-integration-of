@@ -28,4 +28,20 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserType type; // CLIENT або EXECUTOR
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public UserType getType() {
+        return type;
+    }
+
+    public Long getId() {
+        return id;
+    }
 }

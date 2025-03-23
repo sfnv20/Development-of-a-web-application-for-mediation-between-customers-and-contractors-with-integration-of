@@ -12,7 +12,7 @@ import java.util.List;
 public class OrderController {
 
     private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
+    private final UserRepository userRepository; // Поле має бути final
 
     @PostMapping
     public Order createOrder(@RequestBody Order order) {
