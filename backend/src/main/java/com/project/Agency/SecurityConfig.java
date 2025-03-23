@@ -3,26 +3,16 @@ package com.project.Agency;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable() // Вимкнення CSRF для простоти (не рекомендується у продакшн)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Дозволити доступ до ендпоінтів реєстрації/авторизації
-                        .anyRequest().authenticated() // Усі інші запити вимагають автентифікації
-                )
-                .httpBasic(); // Використовуємо базову автентифікацію (можна замінити на JWT або форму)
+        http.csrf().disable()
+                .cors().and() // Включаємо підтримку CORS
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         return http.build();
     }
 }

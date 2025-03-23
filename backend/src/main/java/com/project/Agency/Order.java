@@ -1,5 +1,6 @@
 package com.project.Agency;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,83 +26,21 @@ public class Order {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false) // Замовник (User)
+    @JoinColumn(name = "client_id", nullable = false)
+    @JsonIgnore // Уникаємо серіалізації клієнта для уникнення циклічної залежності
     private User client;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "executor_id") // Виконавець (User)
+    @JoinColumn(name = "executor_id")
+    @JsonIgnore // Уникаємо серіалізації виконавця для уникнення циклічної залежності
     private User executor;
 
-    @Enumerated(EnumType.STRING) // Зберігаємо ENUM як текст у базі даних
-    @Column(nullable = false, length = 20)
-    private OrderStatus status; // NEW, IN_PROGRESS, COMPLETED
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt; // Дата створення замовлення
+    private LocalDateTime createdAt;
 
-    private LocalDateTime deadline; // Дедлайн для виконання замовлення
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public User getClient() {
-        return client;
-    }
-
-    public void setClient(User client) {
-        this.client = client;
-    }
-
-    public User getExecutor() {
-        return executor;
-    }
-
-    public void setExecutor(User executor) {
-        this.executor = executor;
-    }
-
-    public OrderStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(OrderStatus status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getDeadline() {
-        return deadline;
-    }
-
-    public void setDeadline(LocalDateTime deadline) {
-        this.deadline = deadline;
-    }
+    private LocalDateTime deadline;
 }

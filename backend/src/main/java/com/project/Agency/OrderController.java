@@ -1,6 +1,8 @@
 package com.project.Agency;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +15,7 @@ public class OrderController {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository; // Поле має бути final
-
+    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
     @PostMapping
     public Order createOrder(@RequestBody Order order) {
         return orderRepository.save(order);
@@ -21,8 +23,11 @@ public class OrderController {
 
     @GetMapping
     public List<Order> getAllOrders() {
-        return orderRepository.findAll();
+        List<Order> orders = orderRepository.findAll();
+        logger.info("Отримані замовлення: {}", orders);
+        return orders;
     }
+
 
     @PutMapping("/{orderId}/assign-executor")
     public ResponseEntity<?> assignExecutor(@PathVariable Long orderId, @RequestBody Long executorId) {

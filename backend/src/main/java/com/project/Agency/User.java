@@ -1,11 +1,11 @@
 package com.project.Agency;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,21 +27,9 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserType type; // CLIENT або EXECUTOR
+    private UserType type;
 
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public UserType getType() {
-        return type;
-    }
-
-    public Long getId() {
-        return id;
-    }
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Уникаємо серіалізації списку замовлень клієнта для уникнення циклічної залежності
+    private List<Order> clientOrders;
 }
