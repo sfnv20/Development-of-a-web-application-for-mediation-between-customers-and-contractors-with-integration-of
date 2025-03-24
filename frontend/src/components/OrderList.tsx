@@ -15,18 +15,14 @@ const OrderList = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const token = sessionStorage.getItem('authToken'); // Отримуємо токен із sessionStorage
-                if (!token) throw new Error('Користувач не авторизований.');
-
                 const response = await axios.get('http://localhost:8080/api/orders', {
-                    headers: { Authorization: `Bearer ${token}` },
+                    withCredentials: true, // Передаємо сесії або кукі разом із запитом
                 });
                 setOrders(response.data);
             } catch (err) {
                 setError('Не вдалося завантажити замовлення.');
             }
         };
-
 
         fetchOrders();
     }, []);

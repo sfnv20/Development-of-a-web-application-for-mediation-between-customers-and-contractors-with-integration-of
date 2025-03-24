@@ -2,6 +2,10 @@ package com.project.Agency;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,10 +14,11 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
 
+    // Реєстрація нового користувача
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -26,16 +31,25 @@ public class AuthController {
         return ResponseEntity.ok("Реєстрація успішна! Очікуйте підтвердження від адміністратора.");
     }
 
+    // Авторизація користувача
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        User user = userRepository.findByEmailAndIsApprovedTrue(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("Користувача не знайдено або він не підтверджений"));
+        // Аутентифікація користувача
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+        );
 
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).body("Неправильний пароль");
+        // Збереження аутентифікації в контексті безпеки
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Перевірка ролі користувача
+        User user = (User) authentication.getPrincipal();
+        if (user.getType() == UserType.ADMIN) {
+            return ResponseEntity.ok("Вхід успішний! Ви авторизовані як ADMIN.");
+        } else if (user.getType() == UserType.CLIENT) {
+            return ResponseEntity.ok("Вхід успішний! Ви авторизовані як CLIENT.");
+        } else {
+            return ResponseEntity.status(403).body("Невідома роль користувача.");
         }
-
-        String token = jwtUtil.generateToken(user.getEmail());
-        return ResponseEntity.ok(new LoginResponse(token));
     }
 }

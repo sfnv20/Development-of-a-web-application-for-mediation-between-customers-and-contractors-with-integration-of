@@ -2,30 +2,38 @@ package com.project.Agency;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-    @Configuration
-    public class SecurityConfig {
+@Configuration
+public class SecurityConfig {
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            http.csrf().disable()
-                    .cors().and() // Включаємо підтримку CORS
-                    .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/auth/**").permitAll() // Доступ до реєстрації та логіну
-                            .requestMatchers("/api/admin/**").hasAuthority("ADMIN") // Адмін-панель лише для адміністраторів
-                            .requestMatchers("/api/orders/**").hasAnyAuthority("ADMIN", "EXECUTOR") // Замовлення для адміністраторів і виконавців
-                            .anyRequest().authenticated()
-                    )
-                    .httpBasic();
-            return http.build();
-        }
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf().disable()
+                .cors().and() // Увімкнення підтримки CORS
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll() // Доступ до реєстрації та логіну без авторизації
+                        .requestMatchers("/api/orders/**").hasAnyRole("ADMIN", "CLIENT") // Доступ до замовлень для ADMIN і CLIENT
+                        .anyRequest().authenticated()
+                )
+                .formLogin().disable() // Вимикаємо форму логіну, оскільки використовуємо REST API
+                .httpBasic(); // Використовуємо базову авторизацію для тестування через Postman або браузер
 
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder();
-        }
+        return http.build();
     }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+}
