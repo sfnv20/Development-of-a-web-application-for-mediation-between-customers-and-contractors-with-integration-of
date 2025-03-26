@@ -1,11 +1,11 @@
-import React from 'react';
-import CreateOrderForm from '../components/CreateOrderForm';
+import React from "react";
 
 const CreateOrderPage = () => {
     return (
-        <div>
-            <h1>Створити нове замовлення</h1>
-            <CreateOrderForm />
+        <div className="container mt-4">
+            <h2>Order Panel</h2>
+            {/* Тут буде функціональність orders */}
+            <p>Функціональність orders буде додана пізніше.</p>
         </div>
     );
 };

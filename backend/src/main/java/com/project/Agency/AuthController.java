@@ -1,11 +1,8 @@
 package com.project.Agency;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,42 +11,41 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // Реєстрація нового користувача
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    @ResponseStatus(HttpStatus.OK) // Повертаємо статус 200 OK
+    public String register(@RequestBody User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            return ResponseEntity.badRequest().body("Ця електронна пошта вже зареєстрована");
+            return "Ця електронна пошта вже зареєстрована";
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setType(UserType.CLIENT); // Новий користувач отримує роль CLIENT за замовчуванням
-        user.setApproved(false); // Користувач ще не підтверджений адміністратором
+        user.setType(UserType.UNCONFIRMED); // Новий користувач отримує тип UNCONFIRMED за замовчуванням
         userRepository.save(user);
-        return ResponseEntity.ok("Реєстрація успішна! Очікуйте підтвердження від адміністратора.");
+        return "Реєстрація успішна!";
     }
 
-    // Авторизація користувача
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        // Аутентифікація користувача
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
-        );
+    @ResponseStatus(HttpStatus.OK) // Повертаємо статус 200 OK
+    public String login(@RequestBody LoginRequest loginRequest) {
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Користувача не знайдено"));
 
-        // Збереження аутентифікації в контексті безпеки
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // Перевірка ролі користувача
-        User user = (User) authentication.getPrincipal();
-        if (user.getType() == UserType.ADMIN) {
-            return ResponseEntity.ok("Вхід успішний! Ви авторизовані як ADMIN.");
-        } else if (user.getType() == UserType.CLIENT) {
-            return ResponseEntity.ok("Вхід успішний! Ви авторизовані як CLIENT.");
-        } else {
-            return ResponseEntity.status(403).body("Невідома роль користувача.");
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            return "Невірний пароль";
         }
+
+        if (user.getType() == UserType.UNCONFIRMED) {
+            return "Ваш акаунт ще не підтверджений адміністратором";
+        }
+
+        return "Вхід успішний!";
+    }
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(@RequestParam String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Користувача не знайдено"));
+        return ResponseEntity.ok(user); // Повертаємо всю інформацію про користувача
     }
 }

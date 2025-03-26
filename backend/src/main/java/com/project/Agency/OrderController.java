@@ -37,4 +37,16 @@ public class OrderController {
             return ResponseEntity.status(403).body("Доступ заборонено.");
         }
     }
+    @PostMapping("/create")
+    public ResponseEntity<?> createOrder(@RequestBody OrderRequest orderRequest) {
+        Order newOrder = new Order();
+        newOrder.setTitle(orderRequest.getTitle());
+        newOrder.setDescription(orderRequest.getDescription());
+        newOrder.setDeadline(orderRequest.getDeadline());
+        newOrder.setCreatedAt(LocalDateTime.now()); // Автоматична генерація дати створення
+
+        orderRepository.save(newOrder);
+
+        return ResponseEntity.ok("Замовлення створено успішно!");
+    }
 }

@@ -15,11 +15,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
-                .cors().and() // Увімкнення підтримки CORS
+                .cors().and() // Дозволяємо CORS
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Доступ до реєстрації та логіну без авторизації
-                        .requestMatchers("/api/orders/**").hasAnyRole("ADMIN", "CLIENT") // Доступ до замовлень для ADMIN і CLIENT
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/auth/**").permitAll() // Дозволяємо доступ до ендпоінтів авторизації та реєстрації
+                        .requestMatchers("/admin/**").hasRole("ADMIN") // Доступ до адмін-панелі лише для ADMIN
+                        .requestMatchers("/executor/**").hasRole("EXECUTOR") // Доступ до ресурсів виконавця лише для EXECUTOR
+                        .requestMatchers("/client/**").hasRole("CLIENT") // Доступ до ресурсів клієнта лише для CLIENT
+                        .anyRequest().permitAll() // Дозволяємо всі інші запити без авторизації
                 )
                 .formLogin().disable() // Вимикаємо форму логіну, оскільки використовуємо REST API
                 .httpBasic(); // Використовуємо базову авторизацію для тестування через Postman або браузер

@@ -1,29 +1,37 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import HomePage from "./pages/HomePage";
-import CreateOrderPage from "./pages/CreateOrderPage";
-import RegisterPage from "./pages/RegisterPage";
-import LoginPage from "./pages/LoginPage";
-import AdminPage from "./pages/AdminPage"; // Сторінка адміністратора
 import Navbar from "./components/Navbar";
-import { AuthProvider } from "./components/AuthProvider";
+import AuthPage from "./pages/AuthPage";
+import CreateOrderPage from "./pages/CreateOrderPage";
+import AdminPanelPage from "./pages/AdminPanelPage";
+import OrderListPage from "./pages/OrderListPage";
 
 const App = () => {
     return (
-        <AuthProvider>
-            <Router>
-                <Navbar />
-                <div className="container mt-4">
-                    <Routes>
-                        <Route path="/" element={<HomePage />} />
-                        <Route path="/create-order" element={<CreateOrderPage />} />
-                        <Route path="/register" element={<RegisterPage />} />
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/admin" element={<AdminPage />} /> {/* Маршрут для адміністратора */}
-                    </Routes>
-                </div>
-            </Router>
-        </AuthProvider>
+        <Router>
+            {/* Панель навігації */}
+            <Navbar />
+
+            {/* Основний контент */}
+            <div className="container mt-4">
+                <Routes>
+                    {/* Головна сторінка */}
+                    <Route path="/" element={<h1>Головна сторінка</h1>} />
+
+                    {/* Сторінка авторизації/реєстрації */}
+                    <Route path="/auth" element={<AuthPage />} />
+
+                    {/* Сторінка створення замовлення */}
+                    <Route path="/create-order" element={<CreateOrderPage />} />
+
+                    {/* Сторінка адмін панелі */}
+                    <Route path="/admin-panel" element={<AdminPanelPage />} />
+
+                    {/* Сторінка списку замовлень */}
+                    <Route path="/orders" element={<OrderListPage />} />
+                </Routes>
+            </div>
+        </Router>
     );
 };
 
