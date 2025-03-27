@@ -25,15 +25,11 @@ public class Order {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false)
-    @JsonIgnore // Уникаємо серіалізації клієнта для уникнення циклічної залежності
-    private User client; // Замовник
+    @Column(name = "client_id", nullable = false)
+    private Long clientId; // ID замовника
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "executor_id")
-    @JsonIgnore // Уникаємо серіалізації виконавця для уникнення циклічної залежності
-    private User executor; // Виконавець
+    @Column(name = "executor_id")
+    private Long executorId; // ID виконавця (може бути null)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

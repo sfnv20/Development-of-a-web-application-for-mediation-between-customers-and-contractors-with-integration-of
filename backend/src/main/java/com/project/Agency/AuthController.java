@@ -1,5 +1,7 @@
 package com.project.Agency;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,20 +29,20 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @ResponseStatus(HttpStatus.OK) // Повертаємо статус 200 OK
-    public String login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("Користувача не знайдено"));
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            return "Невірний пароль";
+            return ResponseEntity.status(401).body("Невірний пароль");
         }
 
-        if (user.getType() == UserType.UNCONFIRMED) {
-            return "Ваш акаунт ще не підтверджений адміністратором";
-        }
+        // Створюємо сесію та зберігаємо тип користувача
+        HttpSession session = request.getSession();
+        session.setAttribute("userId", user.getId());
+        session.setAttribute("userType", user.getType());
 
-        return "Вхід успішний!";
+        return ResponseEntity.ok("Вхід успішний!");
     }
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@RequestParam String email) {

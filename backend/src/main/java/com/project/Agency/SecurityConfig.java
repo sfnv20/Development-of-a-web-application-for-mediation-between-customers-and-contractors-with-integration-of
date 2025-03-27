@@ -17,15 +17,15 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // Дозволяємо доступ до авторизації та реєстрації без токена
-                        .requestMatchers("/api/orders/**").permitAll() // Захищаємо доступ до списку замовлень
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/orders/create").hasAnyRole("CLIENT", "ADMIN") // Захищаємо створення замовлень
+                        .requestMatchers("/api/orders").hasAnyRole("CLIENT", "ADMIN") // Захищаємо доступ до списку замовлень
+                        .anyRequest().permitAll() // Дозволяємо доступ до інших ендпоінтів без авторизації
                 )
-                .formLogin().disable()
-                .httpBasic(); // Використовуємо базову авторизацію для тестування
+                .formLogin().disable() // Вимикаємо стандартну форму логіну
+                .httpBasic(); // Використовуємо Basic Authentication
 
         return http.build();
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
