@@ -7,6 +7,7 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    List<Order> findByClient(User client);
-    List<Order> findByExecutor(User executor);
+    List<Order> findByClient(User client); // Замовлення за клієнтом
+
+    List<Order> findByExecutor(User executor); // Замовлення за виконавцем
 }
