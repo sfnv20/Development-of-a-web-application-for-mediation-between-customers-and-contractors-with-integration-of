@@ -5,14 +5,16 @@ import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 
 const OrdersPage = () => {
-    const { user } = useContext(UserContext); // Отримуємо дані користувача
-    const [orders, setOrders] = useState([]); // Стан для замовлень
-    const [loading, setLoading] = useState(true); // Стан для завантаження
-    const navigate = useNavigate(); // Для навігації
+    const { user } = useContext(UserContext);
+    const [orders, setOrders] = useState([]);
+    const [filteredOrders, setFilteredOrders] = useState([]); // Для фільтрованих замовлень
+    const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!user) {
-            navigate('/'); // Перенаправляємо на головну сторінку, якщо користувач не авторизований
+            navigate('/');
             return;
         }
 
@@ -25,7 +27,7 @@ const OrdersPage = () => {
                 } else if (user.role === 'EXECUTOR') {
                     endpoint = `/api/orders/executor/${user.id}/approved`;
                 } else if (user.role === 'ADMIN') {
-                    endpoint = `/api/orders`; // Адміністратор бачить всі замовлення
+                    endpoint = `/api/orders`;
                 } else {
                     throw new Error('Ваша роль не підтримується для цієї сторінки');
                 }
@@ -37,7 +39,8 @@ const OrdersPage = () => {
 
                 if (!response.ok) throw new Error('Не вдалося завантажити замовлення');
                 const data = await response.json();
-                setOrders(data); // Зберігаємо замовлення у стані
+                setOrders(data);
+                setFilteredOrders(data); // Початково показуємо всі замовлення
             } catch (error) {
                 toast.error(error.message);
             } finally {
@@ -48,26 +51,44 @@ const OrdersPage = () => {
         fetchOrders();
     }, [user, navigate]);
 
+    // Фільтрація замовлень
+    const handleSearch = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchTerm(value);
+
+        const filtered = orders.filter((order) =>
+            order.title.toLowerCase().includes(value) || order.id.toString().includes(value)
+        );
+        setFilteredOrders(filtered);
+    };
+
     if (!user) return null;
 
     return (
         <PageLayout title="Список замовлень">
+            <input
+                type="text"
+                placeholder="Пошук за ID або назвою..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="form-control mb-3"
+            />
             {loading ? (
                 <p>Завантаження замовлень...</p>
-            ) : orders.length > 0 ? (
+            ) : filteredOrders.length > 0 ? (
                 <ul className="list-group">
-                    {orders.map((order) => (
+                    {filteredOrders.map((order) => (
                         <li key={order.id} className="list-group-item d-flex justify-content-between align-items-center">
                             <div>
-                                <strong>ID: {order.id}  | </strong>
-                                <strong>Title: {order.title}</strong>
-                                <p>{order.description.slice(0, 20)}...</p> {/* Скорочуємо опис до 20 символів */}
+                                <strong>ID: {order.id} </strong>
+                                <p><strong>{order.title}</strong></p>
+                                <p>{order.description.slice(0, 20)}</p>
                                 <p>Дедлайн: {order.deadline}</p>
                                 <p>Статус: {order.status}</p>
                             </div>
                             <button
                                 className="btn btn-primary"
-                                onClick={() => navigate(`/orders/${order.id}`)} // Перехід на сторінку деталей
+                                onClick={() => navigate(`/orders/${order.id}`)}
                             >
                                 Деталі
                             </button>
@@ -75,7 +96,7 @@ const OrdersPage = () => {
                     ))}
                 </ul>
             ) : (
-                <p>Замовлення відсутні.</p>
+                <p>Замовлення не знайдено.</p>
             )}
         </PageLayout>
     );

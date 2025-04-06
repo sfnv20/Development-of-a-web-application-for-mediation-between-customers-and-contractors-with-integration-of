@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const OrdersModeration = () => {
     const [orders, setOrders] = useState([]);
+    const [filteredOrders, setFilteredOrders] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     const fetchOrders = async () => {
         try {
             const response = await fetch('/api/orders', {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
             });
 
-            if (!response.ok) {
-                throw new Error('Не вдалося завантажити список замовлень');
-            }
-
+            if (!response.ok) throw new Error('Не вдалося завантажити список замовлень');
             const data = await response.json();
             setOrders(data);
+            setFilteredOrders(data); // Початково показуємо всі замовлення
         } catch (error) {
             toast.error(error.message);
         } finally {
@@ -27,20 +27,26 @@ const OrdersModeration = () => {
         }
     };
 
+    // Фільтрація замовлень
+    const handleSearch = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchTerm(value);
+
+        const filtered = orders.filter((order) =>
+            order.title.toLowerCase().includes(value) || order.id.toString().includes(value)
+        );
+        setFilteredOrders(filtered);
+    };
+
     const updateOrderStatus = async (orderId, newStatus) => {
         try {
             const response = await fetch(`/api/orders/${orderId}/status`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),
             });
 
-            if (!response.ok) {
-                throw new Error('Не вдалося оновити статус замовлення');
-            }
-
+            if (!response.ok) throw new Error('Не вдалося оновити статус замовлення');
             toast.success('Статус замовлення успішно оновлено!');
             fetchOrders(); // Оновлюємо список замовлень
         } catch (error) {
@@ -55,16 +61,14 @@ const OrdersModeration = () => {
                 headers: { 'Content-Type': 'application/json' },
             });
 
-            if (!response.ok) {
-                throw new Error('Не вдалося видалити замовлення');
-            }
-
+            if (!response.ok) throw new Error('Не вдалося видалити замовлення');
             toast.success('Замовлення успішно видалено!');
             fetchOrders(); // Оновлюємо список замовлень
         } catch (error) {
             toast.error(error.message);
         }
     };
+
     const assignExecutor = async (orderId, executorId) => {
         try {
             const response = await fetch(`/api/orders/${orderId}/executor`, {
@@ -90,11 +94,23 @@ const OrdersModeration = () => {
     return (
         <div>
             <h3>Модерація замовлень</h3>
+
+            {/* Поле пошуку */}
+            <input
+                type="text"
+                placeholder="Пошук за ID або назвою..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="form-control mb-3"
+            />
+
             <ul className="list-group">
-                {orders.map((order) => (
+                {filteredOrders.map((order) => (
                     <li key={order.id} className="list-group-item d-flex justify-content-between align-items-center">
-                        ID: {order.id} - Title: {order.title} - Status: {order.status} | ID: {order.executor.id} - {order.executor ? order.executor.fullName : 'Не призначено'}
+                        ID: {order.id} | {order.title} | Статус: {order.status} |
+                        Виконавець: {order.executor ? `${order.executor.fullName} (ID: ${order.executor.id})` : 'Не призначено'}
                         <div>
+                            {/* Кнопка для зміни статусу */}
                             <select
                                 value={order.status}
                                 onChange={(e) => updateOrderStatus(order.id, e.target.value)}
@@ -103,11 +119,29 @@ const OrdersModeration = () => {
                                 <option value="PENDING">Очікується</option>
                                 <option value="APPROVED">Підтверджено</option>
                             </select>
-                            <button onClick={() => assignExecutor(order.id, prompt('Введіть ID виконавця'))}
-                                    className="btn btn-primary btn-sm">
+
+                            {/* Кнопка для перегляду деталей */}
+                            <button
+                                onClick={() => navigate(`/orders/${order.id}`)}
+                                className="btn btn-primary btn-sm me-2"
+                            >
+                                Деталі
+                            </button>
+
+                            {/* Кнопка для призначення виконавця */}
+                            <button
+                                onClick={() => assignExecutor(order.id, prompt('Введіть ID виконавця'))}
+                                className="btn btn-secondary btn-sm me-2"
+                            >
                                 Призначити виконавця
                             </button>
-                            <button onClick={() => deleteOrder(order.id)} className="btn btn-danger btn-sm">Видалити
+
+                            {/* Кнопка для видалення */}
+                            <button
+                                onClick={() => deleteOrder(order.id)}
+                                className="btn btn-danger btn-sm"
+                            >
+                                Видалити
                             </button>
                         </div>
                     </li>
