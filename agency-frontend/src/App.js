@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import CreateOrder from './pages/CreateOrder';
 import OrdersPage from './pages/OrdersPage'; // Сторінка замовлень
+import AdminPanel from './pages/AdminPanel';
 import { ToastContainer } from 'react-toastify';
 
 const App = () => {
@@ -20,6 +21,8 @@ const App = () => {
                 <Route path="/orders/create" element={<CreateOrder />} />
                 {/* Сторінка списку замовлень */}
                 <Route path="/orders" element={<OrdersPage />} />
+                {/* Адмін-панель */}
+                <Route path="/admin" element={<AdminPanel />} />
             </Routes>
             {/* Контейнер для сповіщень Toastify */}
             <ToastContainer position="bottom-right" autoClose={3000} />

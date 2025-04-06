@@ -17,6 +17,7 @@ const Header = () => {
                         <div className="d-flex align-items-center">
                             <Link to="/orders" className="text-white text-decoration-none me-3">Список замовлень</Link>
                             <Link to="/orders/create" className="text-white text-decoration-none me-3">Створити замовлення</Link>
+                            <Link to="/admin" className="text-white text-decoration-none me-3">Адмін панель</Link>
                         </div>
 
                         {/* Привітання та кнопка виходу */}

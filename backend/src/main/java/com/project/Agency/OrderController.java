@@ -5,6 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
+
+import lombok.*;
 
 import static com.project.Agency.User.Role.ADMIN;
 
@@ -38,19 +41,42 @@ public class OrderController {
         return ResponseEntity.ok(savedOrder);
     }
 
-    // Призначити виконавця до замовлення (тільки адміністратор)
-    @PutMapping("/{orderId}/assign-executor")
-    public Order assignExecutor(
-            @RequestHeader("User-Role") String role,
-            @PathVariable Long orderId,
-            @RequestParam Long executorId
-    ) {
-        if (!role.equals("ADMIN")) {
-            throw new RuntimeException("Доступ заборонено: тільки адміністратор може призначати виконавців");
-        }
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Замовлення не знайдено"));
+    // Оновити статус замовлення
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        String newStatus = request.get("status");
+        return orderRepository.findById(id)
+                .map(order -> {
+                    order.setStatus(Order.Status.valueOf(newStatus));
+                    orderRepository.save(order);
+                    return ResponseEntity.ok(order);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Призначити виконавця до замовлення
+    @PutMapping("/{id}/executor")
+    public ResponseEntity<Order> assignExecutor(@PathVariable Long id, @RequestBody Map<String, Long> request) {
+        Long executorId = request.get("executorId");
         User executor = userRepository.findById(executorId).orElseThrow(() -> new RuntimeException("Виконавець не знайдений"));
-        order.setExecutor(executor);
-        return orderRepository.save(order);
+
+        return orderRepository.findById(id)
+                .map(order -> {
+                    order.setExecutor(executor);
+                    orderRepository.save(order);
+                    return ResponseEntity.ok(order);
+                })
+                .orElse(ResponseEntity.notFound().build()); // Повертаємо статус 404 Not Found, якщо замовлення не знайдено
+    }
+
+    // Видалити замовлення
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
+        if (orderRepository.existsById(id)) {
+            orderRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
