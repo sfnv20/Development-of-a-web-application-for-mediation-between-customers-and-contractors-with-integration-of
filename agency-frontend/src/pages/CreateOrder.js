@@ -1,12 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { UserContext } from '../UserContext';
 import { toast } from 'react-toastify';
+import PageLayout from '../components/PageLayout'; // Імпортуємо базовий дизайн
 
 const CreateOrder = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [deadline, setDeadline] = useState('');
-    const { user } = useContext(UserContext); // Отримуємо дані авторизованого користувача з контексту
+    const { user } = useContext(UserContext);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -17,22 +18,11 @@ const CreateOrder = () => {
 
             const response = await fetch('http://localhost:8080/api/orders/create', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    clientId: user.id,
-                    title,
-                    description,
-                    deadline,
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clientId: user.id, title, description, deadline }),
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Не вдалося створити замовлення');
-            }
-
+            if (!response.ok) throw new Error('Не вдалося створити замовлення');
             toast.success('Замовлення успішно створено!');
             setTitle('');
             setDescription('');
@@ -43,9 +33,8 @@ const CreateOrder = () => {
     };
 
     return (
-        <div className="container mt-5">
+        <PageLayout title="Створити замовлення">
             <form onSubmit={handleSubmit} className="w-50 mx-auto">
-                <h2>Створити замовлення</h2>
                 <div className="mb-3">
                     <input
                         type="text"
@@ -74,7 +63,7 @@ const CreateOrder = () => {
                 </div>
                 <button type="submit" className="btn btn-primary w-100">Створити</button>
             </form>
-        </div>
+        </PageLayout>
     );
 };
 

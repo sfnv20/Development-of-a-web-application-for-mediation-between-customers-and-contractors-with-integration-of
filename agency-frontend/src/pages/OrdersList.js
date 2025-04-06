@@ -1,75 +1,83 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { UserContext } from '../UserContext';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import PageLayout from '../components/PageLayout'; // Імпортуємо базовий шаблон
 
 const OrdersList = () => {
-    const { user } = useContext(UserContext);
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { user } = useContext(UserContext); // Отримуємо дані користувача з контексту
+    const [orders, setOrders] = useState([]); // Стан для замовлень
+    const [loading, setLoading] = useState(true); // Стан для завантаження
+    const navigate = useNavigate(); // Для перенаправлення
 
     useEffect(() => {
+        if (!user) {
+            navigate('/'); // Перенаправляємо на головну сторінку, якщо користувач не авторизований
+            return;
+        }
+
         const fetchOrders = async () => {
             try {
                 let endpoint;
 
+                // Визначаємо endpoint залежно від ролі користувача
                 if (user.role === 'CLIENT') {
                     endpoint = `/api/orders/client/${user.id}`;
                 } else if (user.role === 'EXECUTOR') {
                     endpoint = `/api/orders/executor/${user.id}`;
                 } else if (user.role === 'ADMIN') {
-                    endpoint = `/api/orders/admin`;
+                    endpoint = `/api/orders`; // Адміністратор бачить всі замовлення
+                } else {
+                    throw new Error('Ваша роль не підтримується для цієї сторінки');
                 }
 
                 const response = await fetch(endpoint, {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'User-Role': user.role,
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Помилка завантаження замовлень: ${response.statusText}`);
-                }
-
+                if (!response.ok) throw new Error('Не вдалося завантажити замовлення');
                 const data = await response.json();
-                setOrders(data);
+                setOrders(data); // Зберігаємо замовлення у стані
             } catch (error) {
                 toast.error(error.message);
             } finally {
-                setLoading(false);
+                setLoading(false); // Завершуємо завантаження
             }
         };
 
         fetchOrders();
-    }, [user]);
+    }, [user, navigate]);
 
-    if (loading) {
-        return <div className="container mt-5">Завантаження замовлень...</div>;
-    }
+    if (!user) return null;
 
     return (
-        <div className="container mt-5">
-            <h2>Список замовлень</h2>
-            {orders.length > 0 ? (
+        <PageLayout title="Список замовлень">
+            {loading ? (
+                <p>Завантаження замовлень...</p>
+            ) : orders.length > 0 ? (
                 <ul className="list-group">
                     {orders.map((order) => (
                         <li key={order.id} className="list-group-item">
                             <strong>{order.title}</strong>
                             <p>Опис: {order.description}</p>
                             <p>Дедлайн: {order.deadline}</p>
-                            <p>
-                                Виконавець:{' '}
-                                {order.executor ? order.executor.fullName : 'Не призначено'}
-                            </p>
-                            <p>Статус: {order.status}</p>
+                            {user.role === 'CLIENT' && (
+                                <p>Виконавець: {order.executor ? order.executor.fullName : 'Не призначено'}</p>
+                            )}
+                            {user.role === 'EXECUTOR' && (
+                                <p>Замовник: {order.client ? order.client.fullName : 'Не вказано'}</p>
+                            )}
+                            {(user.role === 'ADMIN' || user.role === 'EXECUTOR') && (
+                                <p>Статус: {order.status}</p>
+                            )}
                         </li>
                     ))}
                 </ul>
             ) : (
                 <p>Замовлення відсутні.</p>
             )}
-        </div>
+        </PageLayout>
     );
 };
 

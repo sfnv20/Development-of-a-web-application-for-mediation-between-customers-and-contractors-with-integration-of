@@ -2,16 +2,17 @@ import React, { useEffect, useState, useContext } from 'react';
 import { UserContext } from '../UserContext';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import PageLayout from '../components/PageLayout'; // Імпортуємо базовий дизайн
 
 const OrdersPage = () => {
-    const { user } = useContext(UserContext); // Отримуємо дані користувача з контексту
-    const [orders, setOrders] = useState([]); // Стан для замовлень
-    const [loading, setLoading] = useState(true); // Стан для завантаження
-    const navigate = useNavigate(); // Для перенаправлення
+    const { user } = useContext(UserContext);
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!user) {
-            navigate('/'); // Перенаправляємо на головну сторінку, якщо користувач не авторизований
+            navigate('/');
             return;
         }
 
@@ -19,13 +20,12 @@ const OrdersPage = () => {
             try {
                 let endpoint;
 
-                // Визначаємо endpoint залежно від ролі користувача
                 if (user.role === 'CLIENT') {
                     endpoint = `/api/orders/client/${user.id}`;
                 } else if (user.role === 'EXECUTOR') {
                     endpoint = `/api/orders/executor/${user.id}`;
                 } else if (user.role === 'ADMIN') {
-                    endpoint = `/api/orders`; // Адміністратор бачить всі замовлення
+                    endpoint = `/api/orders`;
                 } else {
                     throw new Error('Ваша роль не підтримується для цієї сторінки');
                 }
@@ -37,31 +37,24 @@ const OrdersPage = () => {
 
                 if (!response.ok) throw new Error('Не вдалося завантажити замовлення');
                 const data = await response.json();
-                setOrders(data); // Зберігаємо замовлення у стані
+                setOrders(data);
             } catch (error) {
                 toast.error(error.message);
             } finally {
-                setLoading(false); // Завершуємо завантаження
+                setLoading(false);
             }
         };
 
         fetchOrders();
     }, [user, navigate]);
 
-    if (!user) return null; // Нічого не рендеримо, якщо користувач не авторизований
-
-    if (loading) return <div className="container mt-5">Завантаження замовлень...</div>;
+    if (!user) return null;
 
     return (
-        <div className="container mt-5">
-            <h2>
-                {user.role === 'CLIENT'
-                    ? 'Мої замовлення'
-                    : user.role === 'EXECUTOR'
-                        ? 'Призначені замовлення'
-                        : 'Всі замовлення'}
-            </h2>
-            {orders.length > 0 ? (
+        <PageLayout title="Список замовлень">
+            {loading ? (
+                <p>Завантаження замовлень...</p>
+            ) : orders.length > 0 ? (
                 <ul className="list-group">
                     {orders.map((order) => (
                         <li key={order.id} className="list-group-item">
@@ -83,7 +76,7 @@ const OrdersPage = () => {
             ) : (
                 <p>Замовлення відсутні.</p>
             )}
-        </div>
+        </PageLayout>
     );
 };
 

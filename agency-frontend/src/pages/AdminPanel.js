@@ -1,19 +1,25 @@
 import React from 'react';
+import PageLayout from '../components/PageLayout'; // Імпортуємо базовий шаблон
 import UsersModeration from './UsersModeration';
 import OrdersModeration from './OrdersModeration';
 
 const AdminPanel = () => {
     return (
-        <div className="container mt-5">
-            <h2>Адмін-панель</h2>
-            <div className="mt-4">
-                <UsersModeration />
+        <PageLayout title="Адмін-панель">
+            <div className="admin-section">
+                {/* Модерація користувачів */}
+                <section className="moderation-section">
+                    <UsersModeration />
+                </section>
+
+                <hr />
+
+                {/* Модерація замовлень */}
+                <section className="moderation-section">
+                    <OrdersModeration />
+                </section>
             </div>
-            <hr />
-            <div className="mt-4">
-                <OrdersModeration />
-            </div>
-        </div>
+        </PageLayout>
     );
 };
 
