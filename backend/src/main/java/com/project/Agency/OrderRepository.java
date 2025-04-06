@@ -9,4 +9,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByClientId(Long clientId);
 
     List<Order> findByExecutorId(Long executorId);
+
+    List<Order> findByExecutorIdAndStatus(Long executorId, Order.Status status);
+
 }

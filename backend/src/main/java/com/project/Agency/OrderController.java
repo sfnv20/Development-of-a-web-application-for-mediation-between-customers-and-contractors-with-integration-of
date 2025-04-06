@@ -45,10 +45,9 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    // Повернути замовлення виконавця
-    @GetMapping("/executor/{executorId}")
-    public ResponseEntity<List<Order>> getOrdersByExecutor(@PathVariable Long executorId) {
-        List<Order> orders = orderRepository.findByExecutorId(executorId);
+    @GetMapping("/executor/{executorId}/approved")
+    public ResponseEntity<List<Order>> getApprovedOrdersByExecutor(@PathVariable Long executorId) {
+        List<Order> orders = orderRepository.findByExecutorIdAndStatus(executorId, Order.Status.APPROVED);
         return ResponseEntity.ok(orders);
     }
 
@@ -90,5 +89,13 @@ public class OrderController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    // Отримати замовлення за айді
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+        return orderRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

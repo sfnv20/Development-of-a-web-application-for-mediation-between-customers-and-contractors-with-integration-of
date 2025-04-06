@@ -7,6 +7,7 @@ import CreateOrder from './pages/CreateOrder';
 import OrdersPage from './pages/OrdersPage';
 import AdminPanel from './pages/AdminPanel'; // Адмін-панель
 import HomePage from './pages/HomePage'; // Головна сторінка
+import OrderDetails from './pages/OrderDetails';
 import { UserContext } from './UserContext';
 import { ToastContainer } from 'react-toastify';
 
@@ -45,6 +46,8 @@ const App = () => (
             />
             {/* Сторінка списку замовлень */}
             <Route path="/orders" element={<OrdersPage />} />
+            {/* Деталі замовлення */}
+            <Route path="/orders/:id" element={<OrderDetails />} />
             {/* Адмін-панель */}
             <Route
                 path="/admin"

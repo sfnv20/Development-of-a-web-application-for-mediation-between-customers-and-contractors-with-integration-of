@@ -2,17 +2,17 @@ import React, { useEffect, useState, useContext } from 'react';
 import { UserContext } from '../UserContext';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import PageLayout from '../components/PageLayout'; // Імпортуємо базовий дизайн
+import PageLayout from '../components/PageLayout';
 
 const OrdersPage = () => {
-    const { user } = useContext(UserContext);
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
+    const { user } = useContext(UserContext); // Отримуємо дані користувача
+    const [orders, setOrders] = useState([]); // Стан для замовлень
+    const [loading, setLoading] = useState(true); // Стан для завантаження
+    const navigate = useNavigate(); // Для навігації
 
     useEffect(() => {
         if (!user) {
-            navigate('/');
+            navigate('/'); // Перенаправляємо на головну сторінку, якщо користувач не авторизований
             return;
         }
 
@@ -23,9 +23,9 @@ const OrdersPage = () => {
                 if (user.role === 'CLIENT') {
                     endpoint = `/api/orders/client/${user.id}`;
                 } else if (user.role === 'EXECUTOR') {
-                    endpoint = `/api/orders/executor/${user.id}`;
+                    endpoint = `/api/orders/executor/${user.id}/approved`;
                 } else if (user.role === 'ADMIN') {
-                    endpoint = `/api/orders`;
+                    endpoint = `/api/orders`; // Адміністратор бачить всі замовлення
                 } else {
                     throw new Error('Ваша роль не підтримується для цієї сторінки');
                 }
@@ -37,7 +37,7 @@ const OrdersPage = () => {
 
                 if (!response.ok) throw new Error('Не вдалося завантажити замовлення');
                 const data = await response.json();
-                setOrders(data);
+                setOrders(data); // Зберігаємо замовлення у стані
             } catch (error) {
                 toast.error(error.message);
             } finally {
@@ -57,19 +57,20 @@ const OrdersPage = () => {
             ) : orders.length > 0 ? (
                 <ul className="list-group">
                     {orders.map((order) => (
-                        <li key={order.id} className="list-group-item">
-                            <strong>{order.title}</strong>
-                            <p>Опис: {order.description}</p>
-                            <p>Дедлайн: {order.deadline}</p>
-                            {user.role === 'CLIENT' && (
-                                <p>Виконавець: {order.executor ? order.executor.fullName : 'Не призначено'}</p>
-                            )}
-                            {user.role === 'EXECUTOR' && (
-                                <p>Замовник: {order.client ? order.client.fullName : 'Не вказано'}</p>
-                            )}
-                            {(user.role === 'ADMIN' || user.role === 'EXECUTOR') && (
+                        <li key={order.id} className="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>ID: {order.id}  | </strong>
+                                <strong>Title: {order.title}</strong>
+                                <p>{order.description.slice(0, 20)}...</p> {/* Скорочуємо опис до 20 символів */}
+                                <p>Дедлайн: {order.deadline}</p>
                                 <p>Статус: {order.status}</p>
-                            )}
+                            </div>
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => navigate(`/orders/${order.id}`)} // Перехід на сторінку деталей
+                            >
+                                Деталі
+                            </button>
                         </li>
                     ))}
                 </ul>
