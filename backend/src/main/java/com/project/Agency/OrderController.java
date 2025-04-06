@@ -1,15 +1,11 @@
 package com.project.Agency;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Map;
-
-import lombok.*;
-
-import static com.project.Agency.User.Role.ADMIN;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -37,9 +33,25 @@ public class OrderController {
         order.setDescription(request.getDescription());
         order.setDeadline(request.getDeadline());
         order.setClient(client);
+        order.setExecutor(userRepository.findByEmail("trashiy.nikita@gmail.com"));
         Order savedOrder = orderRepository.save(order);
         return ResponseEntity.ok(savedOrder);
     }
+
+    // Повернути замовлення клієнта
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<List<Order>> getOrdersByClient(@PathVariable Long clientId) {
+        List<Order> orders = orderRepository.findByClientId(clientId);
+        return ResponseEntity.ok(orders);
+    }
+
+    // Повернути замовлення виконавця
+    @GetMapping("/executor/{executorId}")
+    public ResponseEntity<List<Order>> getOrdersByExecutor(@PathVariable Long executorId) {
+        List<Order> orders = orderRepository.findByExecutorId(executorId);
+        return ResponseEntity.ok(orders);
+    }
+
 
     // Оновити статус замовлення
     @PutMapping("/{id}/status")

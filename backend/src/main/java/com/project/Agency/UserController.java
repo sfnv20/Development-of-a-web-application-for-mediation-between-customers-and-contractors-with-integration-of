@@ -36,6 +36,7 @@ public class UserController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
+
     // Видалити користувача за ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
