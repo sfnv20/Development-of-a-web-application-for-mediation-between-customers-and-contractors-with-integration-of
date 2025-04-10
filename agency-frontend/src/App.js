@@ -34,7 +34,8 @@ const App = () => (
             {/* Сторінка входу */}
             <Route path="/login" element={<Login />} />
             {/* Сторінка реєстрації */}
-            <Route path="/register" element={<Register />} />
+            <Route path="/register" element={
+                <Register />} />
             {/* Сторінка створення замовлення */}
             <Route
                 path="/orders/create"
@@ -45,9 +46,16 @@ const App = () => (
                 }
             />
             {/* Сторінка списку замовлень */}
-            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/orders" element={
+                <ProtectedRoute allowedRoles={['CLIENT', 'ADMIN', 'EXECUTOR']}>
+                    <OrdersPage />
+                    </ProtectedRoute>
+                } />
             {/* Деталі замовлення */}
-            <Route path="/orders/:id" element={<OrderDetails />} />
+            <Route path="/orders/:id" element={
+                <ProtectedRoute allowedRoles={['CLIENT', 'ADMIN', 'EXECUTOR']}>
+                <OrderDetails />
+            </ProtectedRoute>} />
             {/* Адмін-панель */}
             <Route
                 path="/admin"

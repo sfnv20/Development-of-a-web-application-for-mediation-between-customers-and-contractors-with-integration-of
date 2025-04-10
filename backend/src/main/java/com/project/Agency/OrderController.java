@@ -1,6 +1,7 @@
 package com.project.Agency;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,15 +26,27 @@ public class OrderController {
 
     // Створити нове замовлення (тільки клієнт або адміністратор)
     @PostMapping("/create")
-    public ResponseEntity<Order> createOrder(@RequestBody CreateOrderRequest request) {
-        User client = userRepository.findById(request.getClientId())
-                .orElseThrow(() -> new RuntimeException("Клієнт не знайдений"));
+    public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest request) {
+        // Знаходимо користувача за clientId
+        User user = userRepository.findById(request.getClientId())
+                .orElseThrow(() -> new RuntimeException("Користувач не знайдений"));
+
+        // Перевіряємо роль користувача
+        if (user.getRole() == User.Role.CLIENT) {
+            // Якщо користувач - CLIENT, перевіряємо наявність замовлення зі статусом PENDING
+            boolean hasPendingOrder = orderRepository.existsByClientIdAndStatus(request.getClientId(), Order.Status.PENDING);
+            if (hasPendingOrder) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("У вас вже є непідтверджене замовлення. Завершіть його перед створенням нового.");
+            }
+        }
+
+        // Створюємо нове замовлення
         Order order = new Order();
         order.setTitle(request.getTitle());
         order.setDescription(request.getDescription());
         order.setDeadline(request.getDeadline());
-        order.setClient(client);
-        order.setExecutor(userRepository.findByEmail("trashiy.nikita@gmail.com"));
+        order.setClient(user);
+        order.setStatus(Order.Status.PENDING); // Початковий статус - PENDING
         Order savedOrder = orderRepository.save(order);
         return ResponseEntity.ok(savedOrder);
     }
