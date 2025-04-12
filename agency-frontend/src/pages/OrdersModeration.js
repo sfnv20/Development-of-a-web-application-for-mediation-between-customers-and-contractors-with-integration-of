@@ -118,6 +118,8 @@ const OrdersModeration = () => {
                             >
                                 <option value="PENDING">Очікується</option>
                                 <option value="APPROVED">Підтверджено</option>
+                                <option value="REJECTED">Відхилено</option>
+                                <option value="FINISHED">Завершено</option>
                             </select>
 
                             {/* Кнопка для перегляду деталей */}

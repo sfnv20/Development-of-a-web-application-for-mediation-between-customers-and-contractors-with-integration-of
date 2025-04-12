@@ -5,8 +5,11 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
+import 'react-app-polyfill/stable';
+import 'react-app-polyfill/ie11';
 import { UserProvider } from './UserContext';
 import { createRoot } from 'react-dom/client';
+
 
 // Знаходимо кореневий елемент у HTML
 const rootElement = document.getElementById('root');

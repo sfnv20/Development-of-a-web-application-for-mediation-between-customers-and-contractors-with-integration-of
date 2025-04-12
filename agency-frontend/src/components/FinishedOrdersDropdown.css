@@ -1,0 +1,35 @@
+/* Початковий стан списку */
+.dropdown-enter {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+/* Стан під час відкриття */
+.dropdown-enter-active {
+    max-height: 500px; /* Максимальна висота списку */
+    opacity: 1;
+    transition: max-height 300ms ease-in, opacity 300ms ease-in;
+}
+
+/* Початковий стан при закритті */
+.dropdown-exit {
+    max-height: 500px;
+    opacity: 1;
+}
+
+/* Стан під час закриття */
+.dropdown-exit-active {
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 300ms ease-out, opacity 300ms ease-out;
+}
+
+/* Стиль тексту для відкриття/закриття */
+.dropdown-toggle-text {
+    cursor: pointer;
+}
+
+.dropdown-toggle-text:hover {
+    color: #0056b3; /* Зміна кольору при наведенні */
+}

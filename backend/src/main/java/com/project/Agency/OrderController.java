@@ -16,6 +16,9 @@ public class OrderController {
     private OrderRepository orderRepository;
 
     @Autowired
+    private RequestRepository requestRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     @GetMapping
@@ -65,6 +68,7 @@ public class OrderController {
     }
 
 
+
     // Оновити статус замовлення
     @PutMapping("/{id}/status")
     public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id, @RequestBody Map<String, String> request) {
@@ -110,5 +114,39 @@ public class OrderController {
         return orderRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<List<Order>> getPendingOrders() {
+        List<Order> pendingOrders = orderRepository.findPendingOrders();
+        return ResponseEntity.ok(pendingOrders);
+    }
+
+
+    @GetMapping("/executor/{executorId}")
+    public ResponseEntity<List<Order>> getOrdersByExecutor(@PathVariable Long executorId) {
+        List<Order> executorOrders = orderRepository.findOrdersByExecutor(executorId);
+        return ResponseEntity.ok(executorOrders);
+    }
+
+    // Отримання завершених замовлень клієнта
+    @GetMapping("/client/{clientId}/finished")
+    public ResponseEntity<List<Order>> getFinishedOrdersByClient(@PathVariable Long clientId) {
+        List<Order> finishedOrders = orderRepository.findFinishedOrdersByClient(clientId);
+        return ResponseEntity.ok(finishedOrders);
+    }
+
+    // Отримання завершених замовлень виконавця
+    @GetMapping("/executor/{executorId}/finished")
+    public ResponseEntity<List<Order>> getFinishedOrdersByExecutor(@PathVariable Long executorId) {
+        List<Order> finishedOrders = orderRepository.findFinishedOrdersByExecutor(executorId);
+        return ResponseEntity.ok(finishedOrders);
+    }
+
+    // Отримання всіх завершених замовлень (для адміністратора)
+    @GetMapping("/finished")
+    public ResponseEntity<List<Order>> getAllFinishedOrders() {
+        List<Order> finishedOrders = orderRepository.findAllFinishedOrders();
+        return ResponseEntity.ok(finishedOrders);
     }
 }
