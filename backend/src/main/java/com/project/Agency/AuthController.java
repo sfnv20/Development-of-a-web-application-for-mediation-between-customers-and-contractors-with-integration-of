@@ -1,8 +1,10 @@
 package com.project.Agency;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -15,6 +17,8 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Реєстрація нового користувача
     @PostMapping("/register")
@@ -24,6 +28,7 @@ public class AuthController {
         }
 
         user.setRole(User.Role.UNCONFIRMED); // Тип "UNCONFIRMED" за замовчуванням
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
 
         return "Користувач успішно зареєстрований. Очікуйте підтвердження адміністратора.";
@@ -45,7 +50,7 @@ public class AuthController {
         }
 
         // Перевірка пароля
-        if (!user.getPassword().equals(password)) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", true);
             errorResponse.put("message", "Невірний пароль.");
