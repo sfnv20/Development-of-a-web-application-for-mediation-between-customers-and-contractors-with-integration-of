@@ -31,7 +31,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("UPDATE Order o SET o.status = :status WHERE o.id = :orderId")
     void updateOrderStatus(@Param("orderId") Long orderId, @Param("status") Order.Status status);
     // Отримати завершені замовлення клієнта
-    // Отримати завершені замовлення клієнта
     @Query("SELECT o FROM Order o WHERE o.client.id = :clientId AND o.status = 'FINISHED'")
     List<Order> findFinishedOrdersByClient(@Param("clientId") Long clientId);
 

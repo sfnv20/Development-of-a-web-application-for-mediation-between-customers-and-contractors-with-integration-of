@@ -108,7 +108,8 @@ const OrdersModeration = () => {
                 {filteredOrders.map((order) => (
                     <li key={order.id} className="list-group-item d-flex justify-content-between align-items-center">
                         ID: {order.id} | {order.title} | Статус: {order.status} |
-                        Виконавець: {order.executor ? `${order.executor.fullName} (ID: ${order.executor.id})` : 'Не призначено'}
+                        Виконавець: {order.executor ? `${order.executor.fullName} (ID: ${order.executor.id})` : 'Не призначено'} |
+                        Клієнт: {order.client ? `${order.client.fullName} (ID: ${order.client.id})` : 'Не призначено'}
                         <div>
                             {/* Кнопка для зміни статусу */}
                             <select

@@ -1,8 +1,8 @@
 package com.project.Agency;
 
 import jakarta.persistence.*;
-import lombok.Setter;
 import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 public class Request {

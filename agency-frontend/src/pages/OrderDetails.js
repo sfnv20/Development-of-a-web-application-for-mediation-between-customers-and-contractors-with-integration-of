@@ -42,6 +42,9 @@ const OrderDetails = () => {
             <p>{order.description}</p>
             <p><strong>Дедлайн:</strong> {order.deadline}</p>
             <p><strong>Статус:</strong> {order.status}</p>
+            <p><strong>Виконавець:</strong> {order.executor ? `${order.executor.fullName} (ID: ${order.executor.id})` : 'Не призначено'}</p>
+            <p><strong>Клієнт: </strong>{order.client ? `${order.client.fullName} (ID: ${order.client.id})` : 'Не призначено'} </p>
+
             <button className="btn btn-secondary" onClick={() => navigate(-1)}>Назад</button>
         </PageLayout>
     );
